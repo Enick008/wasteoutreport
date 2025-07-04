@@ -27,6 +27,12 @@
     .ios-button:hover {
       background-color: #2da44a;
     }
+    .ios-button-secondary {
+        background-color: #6b7280;
+    }
+    .ios-button-secondary:hover {
+        background-color: #4b5563;
+    }
     .ios-button:disabled {
         background-color: #9ca3af;
         cursor: not-allowed;
@@ -41,7 +47,6 @@
       border-color: #34c759;
       box-shadow: 0 0 0 2px rgba(52, 199, 89, 0.2);
     }
-    /* Spinner for loading state */
     .loader {
       border: 2px solid #f3f3f3;
       border-top: 2px solid #3498db;
@@ -56,6 +61,16 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    /* Tab Styles */
+    .tab-button {
+        transition: all 0.3s;
+        border-bottom: 3px solid transparent;
+    }
+    .tab-button.active {
+        color: #1d4ed8;
+        font-weight: 700;
+        border-bottom-color: #1d4ed8;
+    }
   </style>
 </head>
 <body class="text-gray-800">
@@ -67,95 +82,149 @@
       <p class="text-gray-600 mt-1">กองช่างสุขาภิบาล</p>
     </header>
 
-    <!-- Main Content -->
-    <div class="grid grid-cols-1 xl:grid-cols-5 gap-8">
-      <!-- Left: Form -->
-      <div class="xl:col-span-2">
-        <div class="ios-card p-6">
-          <h2 class="text-2xl font-bold text-gray-700 mb-6 border-b pb-3">รายงานผล</h2>
-          <form id="garbage-form" class="space-y-4">
-            <div>
-              <label for="date" class="block text-sm font-medium text-gray-700 mb-1">วันที่</label>
-              <input type="date" id="date" name="วันที่" required class="w-full px-3 py-2 ios-input">
-            </div>
-            <div>
-              <label for="time" class="block text-sm font-medium text-gray-700 mb-1">เวลาขนขยะ</label>
-              <input type="time" id="time" name="เวลาขนขยะ" required class="w-full px-3 py-2 ios-input">
-            </div>
-            <div>
-              <label for="weight" class="block text-sm font-medium text-gray-700 mb-1">น้ำหนัก (กิโลกรัม)</label>
-              <input type="number" id="weight" name="น้ำหนัก" step="0.01" required class="w-full px-3 py-2 ios-input" placeholder="0.00">
-            </div>
-            <div>
-              <label for="waste-type" class="block text-sm font-medium text-gray-700 mb-1">ประเภทขยะ</label>
-              <select id="waste-type" name="ประเภทขยะ" required class="w-full px-3 py-2 ios-input">
-                <option value="ขยะใหม่">ขยะใหม่</option>
-                <option value="ขยะตกค้าง">ขยะตกค้าง</option>
-              </select>
-            </div>
-            <div>
-              <label for="recorder" class="block text-sm font-medium text-gray-700 mb-1">ผู้บันทึกข้อมูล</label>
-              <input type="text" id="recorder" name="ผู้บันทึกข้อมูล" required class="w-full px-3 py-2 ios-input" placeholder="ชื่อ-สกุล">
-            </div>
-            <div>
-              <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">หมายเหตุ</label>
-              <textarea id="notes" name="หมายเหตุ" rows="3" class="w-full px-3 py-2 ios-input" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)"></textarea>
-            </div>
-            <div class="pt-2">
-              <button type="submit" id="submit-btn" class="w-full ios-button flex items-center justify-center">บันทึกข้อมูล</button>
-            </div>
-          </form>
-          <div id="status-message" class="mt-4 text-center font-semibold"></div>
-        </div>
-      </div>
+    <!-- Tab Navigation -->
+    <div class="mb-6 border-b border-gray-200">
+        <nav class="flex space-x-6" aria-label="Tabs">
+            <button id="tab-btn-1" type="button" class="tab-button active py-3 px-1 text-lg font-medium text-gray-600 hover:text-blue-700">บันทึกและประวัติ</button>
+            <button id="tab-btn-2" type="button" class="tab-button py-3 px-1 text-lg font-medium text-gray-600 hover:text-blue-700">สรุปสถิติ</button>
+        </nav>
+    </div>
 
-      <!-- Right: Stats and Table -->
-      <div class="xl:col-span-3 space-y-8">
-        <!-- Stats Summary -->
-        <div class="ios-card p-6">
-          <h2 class="text-2xl font-bold text-gray-700 mb-4 border-b pb-3">สรุปข้อมูลสถิติ</h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
-            <div class="bg-green-50 p-4 rounded-lg">
-              <p class="text-sm text-green-700 font-semibold">จำนวนรายการ</p>
-              <p id="stats-total-entries" class="text-2xl font-bold text-green-800">0</p>
+    <!-- Tab Content -->
+    <div>
+        <!-- Tab 1: Record and History -->
+        <div id="tab-panel-1">
+            <div class="grid grid-cols-1 xl:grid-cols-5 gap-8">
+              <!-- Left: Form -->
+              <div class="xl:col-span-2">
+                <div class="ios-card p-6">
+                  <h2 class="text-2xl font-bold text-gray-700 mb-6 border-b pb-3">รายงานผล</h2>
+                  <form id="garbage-form" class="space-y-4">
+                    <div>
+                      <label for="date" class="block text-sm font-medium text-gray-700 mb-1">วันที่</label>
+                      <input type="date" id="date" name="วันที่" required class="w-full px-3 py-2 ios-input">
+                    </div>
+                    <div>
+                      <label for="time" class="block text-sm font-medium text-gray-700 mb-1">เวลาขนขยะ</label>
+                      <input type="time" id="time" name="เวลาขนขยะ" required class="w-full px-3 py-2 ios-input">
+                    </div>
+                    <div>
+                      <label for="weight" class="block text-sm font-medium text-gray-700 mb-1">น้ำหนัก (กิโลกรัม)</label>
+                      <input type="number" id="weight" name="น้ำหนัก" step="0.01" required class="w-full px-3 py-2 ios-input" placeholder="0.00">
+                    </div>
+                    <div>
+                      <label for="waste-type" class="block text-sm font-medium text-gray-700 mb-1">ประเภทขยะ</label>
+                      <select id="waste-type" name="ประเภทขยะ" required class="w-full px-3 py-2 ios-input">
+                        <option value="ขยะใหม่">ขยะใหม่</option>
+                        <option value="ขยะตกค้าง">ขยะตกค้าง</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label for="recorder" class="block text-sm font-medium text-gray-700 mb-1">ผู้บันทึกข้อมูล</label>
+                      <input type="text" id="recorder" name="ผู้บันทึกข้อมูล" required class="w-full px-3 py-2 ios-input" placeholder="ชื่อ-สกุล">
+                    </div>
+                    <div>
+                      <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">หมายเหตุ</label>
+                      <textarea id="notes" name="หมายเหตุ" rows="3" class="w-full px-3 py-2 ios-input" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)"></textarea>
+                    </div>
+                    <div class="pt-2">
+                      <button type="submit" id="submit-btn" class="w-full ios-button flex items-center justify-center">บันทึกข้อมูล</button>
+                    </div>
+                  </form>
+                  <div id="status-message" class="mt-4 text-center font-semibold"></div>
+                </div>
+              </div>
+
+              <!-- Right: History Table -->
+              <div class="xl:col-span-3">
+                 <div class="ios-card p-6">
+                  <h2 class="text-2xl font-bold text-gray-700 mb-4">ประวัติการบันทึก</h2>
+                  <div class="bg-gray-50 p-4 rounded-lg mb-6 border border-gray-200">
+                      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                          <div>
+                              <label for="filter-start-date" class="block text-sm font-medium text-gray-700 mb-1">วันที่เริ่มต้น</label>
+                              <input type="date" id="filter-start-date" class="w-full px-3 py-2 ios-input">
+                          </div>
+                          <div>
+                              <label for="filter-end-date" class="block text-sm font-medium text-gray-700 mb-1">วันที่สิ้นสุด</label>
+                              <input type="date" id="filter-end-date" class="w-full px-3 py-2 ios-input">
+                          </div>
+                          <div>
+                              <label for="filter-waste-type" class="block text-sm font-medium text-gray-700 mb-1">ประเภทขยะ</label>
+                              <select id="filter-waste-type" class="w-full px-3 py-2 ios-input">
+                                  <option value="ทั้งหมด">ทั้งหมด</option>
+                                  <option value="ขยะใหม่">ขยะใหม่</option>
+                                  <option value="ขยะตกค้าง">ขยะตกค้าง</option>
+                              </select>
+                          </div>
+                          <div class="md:col-span-3 flex flex-wrap gap-2 justify-end">
+                              <button id="filter-btn" class="ios-button px-5 py-2">กรองข้อมูล</button>
+                              <button id="reset-btn" class="ios-button ios-button-secondary px-5 py-2">ล้างค่า</button>
+                          </div>
+                      </div>
+                  </div>
+                  <div class="overflow-auto max-h-[600px]">
+                    <table class="min-w-full divide-y divide-gray-200">
+                      <thead class="bg-gray-50 sticky top-0">
+                        <tr>
+                          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">วันที่/เวลา</th>
+                          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">น้ำหนัก</th>
+                          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ประเภท</th>
+                          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ผู้บันทึก</th>
+                          <th class="px-1 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">หมายเหตุ</th>
+                        </tr>
+                      </thead>
+                      <tbody id="history-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                  </div>
+                  <p id="no-data-message" class="text-center text-gray-500 mt-8">กำลังโหลดข้อมูล...</p>
+                </div>
+              </div>
             </div>
-            <div class="bg-blue-50 p-4 rounded-lg">
-              <p class="text-sm text-blue-700 font-semibold">น้ำหนักรวม</p>
-              <p id="stats-total-weight" class="text-2xl font-bold text-blue-800">0.00 กก.</p>
-            </div>
-            <div class="bg-green-50 p-4 rounded-lg col-span-1 sm:col-span-2">
-              <p class="text-sm text-green-700 font-semibold">ขยะใหม่</p>
-              <p id="stats-new-waste" class="text-2xl font-bold text-green-800">0.00 กก.</p>
-            </div>
-            <div class="bg-yellow-50 p-4 rounded-lg col-span-1 sm:col-span-2">
-              <p class="text-sm text-yellow-700 font-semibold">ขยะตกค้าง</p>
-              <p id="stats-old-waste" class="text-2xl font-bold text-yellow-800">0.00 กก.</p>
-            </div>
-          </div>
         </div>
 
-        <!-- History Table -->
-        <div class="ios-card p-6">
-          <h2 class="text-2xl font-bold text-gray-700 mb-6 border-b pb-3">ประวัติการบันทึก</h2>
-          <div class="overflow-auto max-h-[600px]">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50 sticky top-0">
-                <tr>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">วันที่/เวลา</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">น้ำหนัก</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ประเภท</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ผู้บันทึก</th>
-                  <th class="px-1 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">หมายเหตุ</th>
-                </tr>
-              </thead>
-              <tbody id="history-table-body" class="bg-white divide-y divide-gray-200">
-                <!-- Data will be populated by JavaScript -->
-              </tbody>
-            </table>
-          </div>
-          <p id="no-data-message" class="text-center text-gray-500 mt-8">กำลังโหลดข้อมูล...</p>
+        <!-- Tab 2: Statistics Summary -->
+        <div id="tab-panel-2" class="hidden">
+            <div class="ios-card p-6 max-w-4xl mx-auto">
+              <h2 class="text-2xl font-bold text-gray-700 mb-4 border-b pb-3">สรุปข้อมูลสถิติ</h2>
+              <!-- Summary Filter -->
+               <div class="bg-gray-50 p-4 rounded-lg mb-6 border border-gray-200">
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                      <div>
+                          <label for="summary-start-date" class="block text-sm font-medium text-gray-700 mb-1">วันที่เริ่มต้น</label>
+                          <input type="date" id="summary-start-date" class="w-full px-3 py-2 ios-input">
+                      </div>
+                      <div>
+                          <label for="summary-end-date" class="block text-sm font-medium text-gray-700 mb-1">วันที่สิ้นสุด</label>
+                          <input type="date" id="summary-end-date" class="w-full px-3 py-2 ios-input">
+                      </div>
+                      <div class="md:col-start-3 flex justify-end">
+                          <button id="summary-filter-btn" class="ios-button w-full md:w-auto px-5 py-2">ดูสรุป</button>
+                      </div>
+                  </div>
+              </div>
+
+              <!-- Stats Display -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
+                <div class="bg-green-50 p-4 rounded-lg">
+                  <p class="text-sm text-green-700 font-semibold">จำนวนรายการ</p>
+                  <p id="stats-total-entries" class="text-2xl font-bold text-green-800">0</p>
+                </div>
+                <div class="bg-blue-50 p-4 rounded-lg">
+                  <p class="text-sm text-blue-700 font-semibold">น้ำหนักรวม</p>
+                  <p id="stats-total-weight" class="text-2xl font-bold text-blue-800">0.00 กก.</p>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg col-span-1 sm:col-span-2">
+                  <p class="text-sm text-green-700 font-semibold">ขยะใหม่</p>
+                  <p id="stats-new-waste" class="text-2xl font-bold text-green-800">0.00 กก.</p>
+                </div>
+                <div class="bg-yellow-50 p-4 rounded-lg col-span-1 sm:col-span-2">
+                  <p class="text-sm text-yellow-700 font-semibold">ขยะตกค้าง</p>
+                  <p id="stats-old-waste" class="text-2xl font-bold text-yellow-800">0.00 กก.</p>
+                </div>
+              </div>
+            </div>
         </div>
-      </div>
     </div>
   </div>
 
@@ -165,45 +234,84 @@
   </footer>
 
   <script>
-    // !!! สำคัญ: วาง URL ของ Web App ที่ได้จากการ Deploy ที่นี่ !!!
     const webAppUrl = 'https://script.google.com/macros/s/AKfycbyNJxkvNmZdsBa-1Bjd-8xz0nMdUIweTjCeopf9DQLzIPG6Z4XenMxYBKaZoC_cKXY6/exec';
+    
+    let allRecords = [];
 
     document.addEventListener('DOMContentLoaded', () => {
+      // --- Tab Elements ---
+      const tabBtn1 = document.getElementById('tab-btn-1');
+      const tabBtn2 = document.getElementById('tab-btn-2');
+      const tabPanel1 = document.getElementById('tab-panel-1');
+      const tabPanel2 = document.getElementById('tab-panel-2');
+
+      // --- Form Elements ---
       const form = document.getElementById('garbage-form');
       const statusMessage = document.getElementById('status-message');
-      const tableBody = document.getElementById('history-table-body');
-      const noDataMessage = document.getElementById('no-data-message');
       const submitBtn = document.getElementById('submit-btn');
 
-      // Set default date and time
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = (now.getMonth() + 1).toString().padStart(2, '0');
-      const day = now.getDate().toString().padStart(2, '0');
-      const hours = now.getHours().toString().padStart(2, '0');
-      const minutes = now.getMinutes().toString().padStart(2, '0');
+      // --- History Tab Elements ---
+      const tableBody = document.getElementById('history-table-body');
+      const noDataMessage = document.getElementById('no-data-message');
+      const filterStartDate = document.getElementById('filter-start-date');
+      const filterEndDate = document.getElementById('filter-end-date');
+      const filterWasteType = document.getElementById('filter-waste-type');
+      const filterBtn = document.getElementById('filter-btn');
+      const resetBtn = document.getElementById('reset-btn');
       
-      document.getElementById('date').value = `${year}-${month}-${day}`;
-      document.getElementById('time').value = `${hours}:${minutes}`;
+      // --- Summary Tab Elements ---
+      const summaryStartDate = document.getElementById('summary-start-date');
+      const summaryEndDate = document.getElementById('summary-end-date');
+      const summaryFilterBtn = document.getElementById('summary-filter-btn');
 
-      form.addEventListener('submit', (e) => {
-        e.preventDefault();
+      // --- Initial Setup ---
+      setDefaultDateTime();
+      fetchHistory();
+      setupTabEvents();
+
+      // --- Event Listeners ---
+      form.addEventListener('submit', handleFormSubmit);
+      filterBtn.addEventListener('click', applyHistoryFilters);
+      resetBtn.addEventListener('click', resetHistoryFilters);
+      summaryFilterBtn.addEventListener('click', applySummaryFilters);
+
+      // --- Functions ---
+      function setupTabEvents() {
+        tabBtn1.addEventListener('click', () => {
+            tabPanel1.classList.remove('hidden');
+            tabPanel2.classList.add('hidden');
+            tabBtn1.classList.add('active');
+            tabBtn2.classList.remove('active');
+        });
+        tabBtn2.addEventListener('click', () => {
+            tabPanel1.classList.add('hidden');
+            tabPanel2.classList.remove('hidden');
+            tabBtn1.classList.remove('active');
+            tabBtn2.classList.add('active');
+        });
+      }
+
+      function setDefaultDateTime() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = (now.getMonth() + 1).toString().padStart(2, '0');
+        const day = now.getDate().toString().padStart(2, '0');
+        const hours = now.getHours().toString().padStart(2, '0');
+        const minutes = now.getMinutes().toString().padStart(2, '0');
         
-        if (webAppUrl === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
-            statusMessage.textContent = '❌ กรุณาตั้งค่า URL ของ Web App ในไฟล์ HTML ก่อน';
-            statusMessage.className = 'text-red-600 font-semibold';
-            return;
-        }
+        document.getElementById('date').value = `${year}-${month}-${day}`;
+        document.getElementById('time').value = `${hours}:${minutes}`;
+      }
 
+      function handleFormSubmit(e) {
+        e.preventDefault();
         submitBtn.disabled = true;
         submitBtn.innerHTML = `<span class="loader"></span> กำลังบันทึก...`;
-
-        const formData = new URLSearchParams(new FormData(form));
 
         fetch(webAppUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: formData.toString()
+          body: new URLSearchParams(new FormData(form)).toString()
         })
         .then(res => res.json())
         .then(data => {
@@ -211,14 +319,9 @@
             statusMessage.textContent = '✅ บันทึกข้อมูลเรียบร้อยแล้ว!';
             statusMessage.className = 'text-green-600 font-semibold';
             form.reset();
-            // Reset date/time to current after submission
-            document.getElementById('date').value = `${year}-${month}-${day}`;
-            document.getElementById('time').value = `${hours}:${minutes}`;
-            fetchStatistics();
-            fetchHistory();
-          } else {
-            throw new Error(data.error || 'Unknown error');
-          }
+            setDefaultDateTime();
+            fetchHistory(); // Refetch all data
+          } else { throw new Error(data.error || 'Unknown error'); }
         })
         .catch(err => {
           statusMessage.textContent = '❌ เกิดข้อผิดพลาด: ' + err.message;
@@ -229,35 +332,21 @@
           submitBtn.innerHTML = "บันทึกข้อมูล";
           setTimeout(() => statusMessage.textContent = "", 4000);
         });
-      });
-
-      function fetchStatistics() {
-        if (webAppUrl === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') return;
-        fetch(`${webAppUrl}?action=getStats`)
-          .then(res => res.json())
-          .then(data => {
-            if (data.result === 'success') {
-              document.getElementById('stats-total-entries').textContent = data.stats.totalEntries;
-              document.getElementById('stats-total-weight').textContent = `${parseFloat(data.stats.totalWeight).toFixed(2)} กก.`;
-              document.getElementById('stats-new-waste').textContent = `${parseFloat(data.stats.newWasteWeight).toFixed(2)} กก.`;
-              document.getElementById('stats-old-waste').textContent = `${parseFloat(data.stats.oldWasteWeight).toFixed(2)} กก.`;
-            }
-          })
-          .catch(err => console.error("Error fetching stats:", err));
       }
 
       function fetchHistory() {
-        if (webAppUrl === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
-            noDataMessage.textContent = 'กรุณาตั้งค่า Web App URL';
-            return;
-        };
+        noDataMessage.textContent = 'กำลังโหลดข้อมูล...';
         fetch(`${webAppUrl}?action=getHistory`)
           .then(res => res.json())
           .then(data => {
-            if (data.result === 'success') {
-              renderHistory(data.records);
+            if (data.result === 'success' && data.records) {
+              allRecords = data.records;
+              renderHistoryTable(allRecords); // Render table on tab 1
+              updateSummaryStats(allRecords); // Render initial stats on tab 2
             } else {
-              renderHistory([]);
+              allRecords = [];
+              renderHistoryTable([]);
+              updateSummaryStats([]);
             }
           })
           .catch(err => {
@@ -266,16 +355,50 @@
           });
       }
 
-      function renderHistory(records) {
+      function applyHistoryFilters() {
+        const startDate = filterStartDate.value;
+        const endDate = filterEndDate.value;
+        const wasteType = filterWasteType.value;
+
+        let filteredRecords = allRecords.filter(record => {
+            const isAfterStartDate = !startDate || record['วันที่'] >= startDate;
+            const isBeforeEndDate = !endDate || record['วันที่'] <= endDate;
+            const isCorrectWasteType = wasteType === 'ทั้งหมด' || record['ประเภทขยะ'] === wasteType;
+            return isAfterStartDate && isBeforeEndDate && isCorrectWasteType;
+        });
+        renderHistoryTable(filteredRecords);
+      }
+      
+      function resetHistoryFilters() {
+        filterStartDate.value = '';
+        filterEndDate.value = '';
+        filterWasteType.value = 'ทั้งหมด';
+        renderHistoryTable(allRecords);
+      }
+
+      function applySummaryFilters() {
+        const startDate = summaryStartDate.value;
+        const endDate = summaryEndDate.value;
+
+        let filteredRecords = allRecords.filter(record => {
+            const isAfterStartDate = !startDate || record['วันที่'] >= startDate;
+            const isBeforeEndDate = !endDate || record['วันที่'] <= endDate;
+            return isAfterStartDate && isBeforeEndDate;
+        });
+        updateSummaryStats(filteredRecords);
+      }
+
+      function renderHistoryTable(records) {
         tableBody.innerHTML = '';
         if (!records || records.length === 0) {
-          noDataMessage.textContent = 'ยังไม่มีข้อมูลที่บันทึกไว้';
+          noDataMessage.textContent = 'ไม่พบข้อมูลตามเงื่อนไขที่กำหนด';
           noDataMessage.style.display = 'block';
           return;
         }
         noDataMessage.style.display = 'none';
 
-        records.reverse().forEach(row => {
+        const recordsToRender = [...records].reverse();
+        recordsToRender.forEach(row => {
           const tr = document.createElement('tr');
           tr.className = 'hover:bg-gray-50';
           tr.innerHTML = `
@@ -289,9 +412,27 @@
         });
       }
 
-      // Initial data fetch
-      fetchStatistics();
-      fetchHistory();
+      function updateSummaryStats(records) {
+        let totalEntries = records.length;
+        let totalWeight = 0;
+        let newWasteWeight = 0;
+        let oldWasteWeight = 0;
+
+        records.forEach(record => {
+            const weight = parseFloat(record['น้ำหนัก']) || 0;
+            totalWeight += weight;
+            if (record['ประเภทขยะ'] === 'ขยะใหม่') {
+                newWasteWeight += weight;
+            } else if (record['ประเภทขยะ'] === 'ขยะตกค้าง') {
+                oldWasteWeight += weight;
+            }
+        });
+
+        document.getElementById('stats-total-entries').textContent = totalEntries;
+        document.getElementById('stats-total-weight').textContent = `${totalWeight.toFixed(2)} กก.`;
+        document.getElementById('stats-new-waste').textContent = `${newWasteWeight.toFixed(2)} กก.`;
+        document.getElementById('stats-old-waste').textContent = `${oldWasteWeight.toFixed(2)} กก.`;
+      }
     });
   </script>
 </body>
